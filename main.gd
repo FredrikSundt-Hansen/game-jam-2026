@@ -15,8 +15,8 @@ extends Node2D
 @export var pickup_range: float = 12.0
 @export var give_range: float = 16.0
 @export var load_range: float = 24.0
-@export var snack_interval: float = 15.0
-@export var snack_lifetime: float = 12.0
+@export var snack_interval: float = 5.0
+@export var snack_lifetime: float = 15.0
 @export var snack_range: float = 10.0
 
 const TABLE_POS := Vector2(120, 20)
