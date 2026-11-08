@@ -209,6 +209,8 @@ func _call_next_sleigh() -> void:
 	sleigh.position = SLEIGH_POS
 	sleigh.arrived.connect(_on_sleigh_arrived)
 	sleigh.wish_list_rolled.connect(wish_list.show_gifts)
+	# wish_list_rolled fires as the sleigh starts sliding in, so the sound matches its entrance
+	sleigh.wish_list_rolled.connect(func(_g): Sfx.play("sleigh_arrives"))
 	sleigh.leaving.connect(wish_list.clear)
 	sleigh.leaving.connect(_on_sleigh_leaving)
 	sleigh.departed.connect(_on_sleigh_departed)
@@ -216,7 +218,6 @@ func _call_next_sleigh() -> void:
 
 func _on_sleigh_arrived(gifts: Array[String]) -> void:
 	# The gifts appear on the table at the top and have to be carried down to the sleigh
-	Sfx.play("sleigh_arrives")
 	table_gifts.append_array(gifts)
 	queue_redraw()
 

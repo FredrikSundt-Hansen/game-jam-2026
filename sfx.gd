@@ -14,7 +14,7 @@ const SOUNDS := {
 	"sleigh_arrives": preload("res://sounds/sleigh_arrives.mp3"),
 }
 
-const VOLUME_DB := -8.0
+const VOLUME_DB := -15.0
 
 func play(sound: String) -> void:
 	var player := AudioStreamPlayer.new()
