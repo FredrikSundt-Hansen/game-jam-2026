@@ -13,9 +13,9 @@ extends Node2D
 @export var kid_arrival_start: float = 5.0
 @export var kid_arrival_min: float = 2.0
 @export var kid_arrival_decay: float = 0.1
-@export var sleigh_gift_min: int = 2
-@export var sleigh_gift_max: int = 4
-@export var gifts_per_round: float = 1.5 # raises the minimum each round
+@export var sleigh_gift_min: int = 5
+@export var sleigh_gift_max: int = 8
+@export var gifts_per_round: float = 1.0 # raises the minimum each round
 @export var gift_spread_per_round: float = 0.5 # widens the random range each round
 @export var max_sleigh_gifts: int = 14
 @export var sleigh_stay_duration: float = 30.0
