@@ -12,7 +12,7 @@ signal died
 @export var size_per_level: float = 0.15
 @export var field_radius_base: float = 24.0
 @export var field_radius_per_level: float = 10.0
-@export var field_strength: float = 4.0 # how sharply coal curves at the centre; negative pulls coal in
+@export var field_strength: float = 3.0 # how sharply coal bends toward Santa near the centre; negative bends it away
 
 var lives: int
 var size_level: int = 0
@@ -87,12 +87,6 @@ func _animate(input_dir: Vector2, delta: float) -> void:
 	elif velocity.y < 0:
 		$AnimatedSprite2D.animation = "walk_up"
 
-
-func heal() -> void:
-	if dead:
-		return
-	lives = mini(lives + 1, max_lives)
-	hit.emit(lives)
 
 func take_damage() -> void:
 	if invulnerable or dead:

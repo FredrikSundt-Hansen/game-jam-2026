@@ -16,11 +16,11 @@ Santa slides on ice!
 5. Gifts left behind make
    more kids angry!
 
-Dodge the coal. Candy canes
-give hearts back. At full
-health they make Santa
-bigger and add a force field
-that bends the coal.
+Gifts on the sleigh: 10 pts.
+Dodge the coal! Candy canes
+give 5 pts and make Santa
+bigger, with a gravity field
+that bends coal around him.
 
 F11: Fullscreen
 

@@ -13,7 +13,7 @@ func _physics_process(delta: float) -> void:
 	position += direction * speed * delta
 	rotation += spin_speed * delta
 
-# Santa's field bends the coal's path around him
+# Santa's gravity pulls the coal's path into a curve around him
 func _apply_gravity_field(delta: float) -> void:
 	var player := get_tree().get_first_node_in_group("player")
 	if player == null or not player.has_method("get_field_radius"):
@@ -24,9 +24,8 @@ func _apply_gravity_field(delta: float) -> void:
 	if radius <= 0.0 or dist >= radius or dist < 1.0:
 		return
 	var falloff := 1.0 - dist / radius
-	var side := -signf(direction.cross(to_player))
-	if side == 0.0:
-		side = 1.0
+	# Turn toward Santa so the coal curves around him
+	var side := signf(direction.cross(to_player))
 	direction = direction.rotated(side * player.field_strength * falloff * delta)
 
 func _on_body_entered(body: Node2D) -> void:

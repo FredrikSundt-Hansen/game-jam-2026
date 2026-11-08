@@ -28,6 +28,8 @@ extends Node2D
 @export var snack_interval: float = 5.0
 @export var snack_lifetime: float = 15.0
 @export var snack_range: float = 10.0
+@export var gift_points: int = 10
+@export var snack_points: int = 5
 
 const TABLE_POS := Vector2(120, 20)
 const SLEIGH_POS := Vector2(120, 226)
@@ -183,15 +185,11 @@ func _update_kid_arrivals(delta: float) -> void:
 func _update_snack(delta: float) -> void:
 	if snack_time_left > 0.0:
 		snack_time_left -= delta
-		# At full health the snack makes Santa grow; once fully grown it stays put
-		if (player.lives < player.max_lives or player.can_grow()) \
-				and player.global_position.distance_to(snack_pos) < snack_range:
+		if player.global_position.distance_to(snack_pos) < snack_range:
 			snack_time_left = 0.0
 			Sfx.play("santa_eat_snack")
-			if player.lives < player.max_lives:
-				player.heal()
-			else:
-				player.grow()
+			score += snack_points
+			player.grow()
 		if snack_time_left <= 0.0:
 			snack_cooldown = snack_interval
 			queue_redraw()
@@ -232,7 +230,7 @@ func _on_sleigh_arrived(gifts: Array[String]) -> void:
 func _on_sleigh_leaving() -> void:
 	if loaded > 0:
 		Sfx.play("points")
-	score += loaded
+	score += loaded * gift_points
 	loaded = 0
 	# Gifts that never made it onto the sleigh make more kids angry
 	if not table_gifts.is_empty() or player.has_gift:
