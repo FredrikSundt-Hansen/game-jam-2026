@@ -15,7 +15,7 @@ var dead: bool = false
 var gift_name: String = ""
 var facing_row: int = 0 # sprite sheet rows: 0 down, 1 up, 2 left, 3 right
 var walk_time: float = 0.0
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 var has_gift: bool = false:
 	set(v):
 		has_gift = v
@@ -45,18 +45,20 @@ func _physics_process(delta: float) -> void:
 	_animate(input_dir, delta)
 
 func _animate(input_dir: Vector2, delta: float) -> void:
-	if input_dir != Vector2.ZERO:
-		if absf(input_dir.x) > absf(input_dir.y):
-			facing_row = 3 if input_dir.x > 0.0 else 2
-		else:
-			facing_row = 0 if input_dir.y > 0.0 else 1
-	var column := 0
-	if velocity.length() > 10.0:
-		walk_time += delta * 8.0
-		column = int(walk_time) % 4
+	if velocity.length() > 0 :
+		$AnimatedSprite2D.play()
 	else:
-		walk_time = 0.0
-	sprite.frame = facing_row * 4 + column
+		$AnimatedSprite2D.stop()
+
+	if velocity.x > 0:
+		$AnimatedSprite2D.animation = "walk_right"
+	elif velocity.x < 0:
+		$AnimatedSprite2D.animation = "walk_left"
+	elif velocity.y > 0:
+		$AnimatedSprite2D.animation = "walk_down"
+	elif velocity.y < 0:
+		$AnimatedSprite2D.animation = "walk_up"
+
 
 func heal() -> void:
 	if dead:

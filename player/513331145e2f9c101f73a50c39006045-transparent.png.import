@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://drtuq2omox3ot"
-path="res://.godot/imported/santa_sheet.png-b61f139621d56bbc1d575849dea8e973.ctex"
+uid="uid://3wv3qictu3gc"
+path="res://.godot/imported/513331145e2f9c101f73a50c39006045-transparent.png-391fb9afcda1bbbfb273a3f252bd3c38.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://santa_sheet.png"
-dest_files=["res://.godot/imported/santa_sheet.png-b61f139621d56bbc1d575849dea8e973.ctex"]
+source_file="res://player/513331145e2f9c101f73a50c39006045-transparent.png"
+dest_files=["res://.godot/imported/513331145e2f9c101f73a50c39006045-transparent.png-391fb9afcda1bbbfb273a3f252bd3c38.ctex"]
 
 [params]
 

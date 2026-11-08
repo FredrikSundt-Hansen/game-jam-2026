@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bmm1r78c7enpt"]
 
 [ext_resource type="Script" uid="uid://btxxaaah8o3fu" path="res://main.gd" id="1_h2yge"]
-[ext_resource type="PackedScene" uid="uid://dprcjdwnwgtn" path="res://player.tscn" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://c6x438500swgq" path="res://player/player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://bh7bwmlphpx1a" path="res://coal.tscn" id="2_1bvp3"]
 
 [sub_resource type="RectangleShape2D" id="Wall_H"]
