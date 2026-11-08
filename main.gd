@@ -157,6 +157,7 @@ func _on_sled_departed() -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(0, 0, 240, 240), Color(0.7, 0.9, 1))
+	_draw_ice()
 	draw_rect(Rect2(TABLE_POS.x - 24, 12, 48, 8), Color(0.55, 0.35, 0.15))
 	draw_rect(Rect2(SLED_POS.x - 24, 220, 48, 8), Color(0.2, 0.75, 0.3, 0.5))
 	var x0 := TABLE_POS.x - table_gifts.size() * 5 / 2.0
@@ -164,6 +165,26 @@ func _draw() -> void:
 		var box := Rect2(x0 + i * 5, 14, 4, 4)
 		draw_rect(box, Color(0.2, 0.75, 0.3))
 		draw_rect(Rect2(box.position.x + 1.5, box.position.y, 1, 4), Color(1, 0.85, 0.2))
+
+func _draw_ice() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 12345
+	# Darker patches and lighter shine give the ice depth
+	for i in 40:
+		var c := Color(0.62, 0.84, 0.96, 0.5) if i % 2 == 0 else Color(0.85, 0.96, 1, 0.6)
+		draw_rect(Rect2(rng.randi_range(0, 216), rng.randi_range(0, 224), rng.randi_range(8, 24), rng.randi_range(6, 16)), c)
+	# Short diagonal scratches
+	for i in 25:
+		var p := Vector2(rng.randi_range(8, 228), rng.randi_range(8, 228))
+		var dir := Vector2(1, -1) if i % 2 == 0 else Vector2(1, 1)
+		draw_line(p, p + dir * rng.randi_range(4, 10), Color(1, 1, 1, 0.7), 1.0)
+	# Cracks
+	for i in 6:
+		var p := Vector2(rng.randi_range(16, 224), rng.randi_range(16, 224))
+		for s in 4:
+			var n := p + Vector2(rng.randi_range(-8, 8), rng.randi_range(2, 8))
+			draw_line(p, n, Color(0.45, 0.7, 0.88, 0.8), 1.0)
+			p = n
 
 func _on_player_died() -> void:
 	game_over = true
