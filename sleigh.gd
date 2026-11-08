@@ -29,6 +29,12 @@ signal departed
 @export var sleigh_size: Vector2 = Vector2(40, 12)
 @export var color: Color = Color(0.75, 0.15, 0.15)
 
+## How many gifts are stacked on the sleigh; they travel with it when it leaves.
+var loaded_gifts: int = 0:
+	set(v):
+		loaded_gifts = v
+		queue_redraw()
+
 ## The gifts this sleigh is asking for. Read-only from outside.
 var wished_gifts: Array[String] = []
 
@@ -44,6 +50,11 @@ func _ready() -> void:
 func _draw() -> void:
 	# Placeholder art, drawn centered on the node's position.
 	draw_rect(Rect2(-sleigh_size / 2.0, sleigh_size), color)
+	var x0 := -loaded_gifts * 5 / 2.0
+	for i in loaded_gifts:
+		var box := Rect2(x0 + i * 5, -sleigh_size.y / 2.0 - 4, 4, 4)
+		draw_rect(box, Color(0.2, 0.75, 0.3))
+		draw_rect(Rect2(box.position.x + 1.5, box.position.y, 1, 4), Color(1, 0.85, 0.2))
 
 
 ## True while the sleigh is sitting on screen and counting down.
@@ -54,6 +65,13 @@ func is_waiting() -> bool:
 ## Seconds left before the sleigh starts leaving.
 func get_time_left() -> float:
 	return _stay_timer.time_left
+
+
+## Makes the sleigh leave right away instead of waiting out its stay timer.
+func leave_now() -> void:
+	if is_waiting():
+		_stay_timer.stop()
+		_leave()
 
 
 func _arrive() -> void:

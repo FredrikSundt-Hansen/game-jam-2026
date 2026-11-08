@@ -1,6 +1,14 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://child.gd" id="1_child"]
+[ext_resource type="Texture2D" uid="uid://b212dgp6ftrkf" path="res://angry-child.png" id="2_tex"]
 
 [node name="AngryChild" type="Node2D"]
 script = ExtResource("1_child")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.057, 0.057)
+texture_filter = 4
+texture = ExtResource("2_tex")
+region_enabled = true
+region_rect = Rect2(146, 107, 210, 194)

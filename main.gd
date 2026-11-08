@@ -7,21 +7,21 @@ extends Node2D
 @export var start_coal_speed: float = 45.0
 @export var max_coal_speed: float = 90.0
 @export var start_children: int = 5
-@export var sled_gift_count: int = 5
-@export var sled_stay_duration: float = 1.5
+@export var sled_gift_count: int = 8
+@export var sled_stay_duration: float = 60.0
 @export var sled_respawn_delay: float = 1.0
-@export var gift_deadline: float = 45.0
 @export var penalty_kids: int = 1
 @export var max_kids: int = 10
 @export var pickup_range: float = 12.0
 @export var give_range: float = 16.0
+@export var load_range: float = 24.0
 
-const TABLE_POS := Vector2(120, 220)
+const TABLE_POS := Vector2(120, 20)
 const SLED_POS := Vector2(120, 234)
-const DROP_POS := Vector2(120, 20)
 
 const ChildScene := preload("res://child.tscn")
 const SledScene := preload("res://sleigh.tscn")
+const WishListScene := preload("res://wish_list.tscn")
 
 @onready var player: CharacterBody2D = $Player
 @onready var coal_timer: Timer = $CoalTimer
@@ -29,10 +29,12 @@ const SledScene := preload("res://sleigh.tscn")
 var elapsed: float = 0.0
 var game_over: bool = false
 var label: Label
+var wish_list: WishList
 var message: Label
 var kids: Array = []
 var score: int = 0
-var deadline_left: float = -1.0
+var loaded: int = 0
+var sled: Sleigh = null
 var table_gifts: Array[String] = []
 var sled_busy: bool = false
 
@@ -52,6 +54,9 @@ func _ready() -> void:
 	message.add_theme_color_override("font_outline_color", Color.BLACK)
 	message.add_theme_constant_override("outline_size", 6)
 	layer.add_child(message)
+	wish_list = WishListScene.instantiate()
+	wish_list.position = Vector2(372, 72)
+	layer.add_child(wish_list)
 	add_child(layer)
 	player.hit.connect(func(_l): _update_label())
 	player.died.connect(_on_player_died)
@@ -72,7 +77,6 @@ func _process(delta: float) -> void:
 		return
 	elapsed += delta
 	_update_gifts()
-	_update_deadline(delta)
 	_update_label()
 
 func _update_label() -> void:
@@ -81,26 +85,31 @@ func _update_label() -> void:
 		label.text = ""
 		return
 	var text := "Lives: %d  Score: %d" % [player.lives, score]
-	if deadline_left > 0.0:
-		text += "\nDeliver in: %d" % ceili(deadline_left)
+	if sled != null and sled.is_waiting():
+		text += "\nSled leaves in: %d" % ceili(sled.get_time_left())
 	label.text = text
 
 func _update_gifts() -> void:
+	var sled_waiting := sled != null and sled.is_waiting()
 	if not table_gifts.is_empty() and not player.has_gift \
 			and player.global_position.distance_to(TABLE_POS) < pickup_range:
 		player.gift_name = table_gifts.pop_front()
 		player.has_gift = true
 		queue_redraw()
-	if table_gifts.is_empty() and not player.has_gift:
-		deadline_left = -1.0
-		if not sled_busy:
-			_call_next_sled()
+	if sled_waiting and table_gifts.is_empty() and not player.has_gift:
+		# Everything is handled, so the sled doesn't need to wait any longer
+		sled.leave_now()
+		return
+	if not sled_busy:
+		_call_next_sled()
 	if not player.has_gift:
 		return
-	if player.global_position.distance_to(DROP_POS) < give_range:
-		# Carrying a gift over to the other side is the only way to score
+	if sled_waiting and player.global_position.distance_to(SLED_POS) < load_range:
+		# Gifts loaded onto the sled count as points once the sled leaves
 		player.has_gift = false
-		score += 1
+		loaded += 1
+		wish_list.mark_random_done()
+		sled.loaded_gifts = loaded
 		return
 	for kid in kids:
 		if player.global_position.distance_to(kid.global_position) < give_range:
@@ -110,41 +119,49 @@ func _update_gifts() -> void:
 			kid.make_happy()
 			break
 
-func _update_deadline(delta: float) -> void:
-	if deadline_left <= 0.0:
-		return
-	deadline_left -= delta
-	if deadline_left <= 0.0:
-		# Gifts weren't carried over in time, so more angry kids show up
-		for i in penalty_kids:
-			add_random_thrower()
-		deadline_left = gift_deadline
-
 func _call_next_sled() -> void:
 	sled_busy = true
 	await get_tree().create_timer(sled_respawn_delay).timeout
 	if game_over:
 		return
-	var sled := SledScene.instantiate()
+	sled = SledScene.instantiate()
 	sled.stay_duration = sled_stay_duration
 	sled.wish_list_size = sled_gift_count
 	sled.position = SLED_POS
 	sled.arrived.connect(_on_sled_arrived)
-	sled.departed.connect(func() -> void: sled_busy = false)
+	sled.wish_list_rolled.connect(wish_list.show_gifts)
+	sled.leaving.connect(wish_list.clear)
+	sled.leaving.connect(_on_sled_leaving)
+	sled.departed.connect(_on_sled_departed)
 	add_child(sled)
 
 func _on_sled_arrived(gifts: Array[String]) -> void:
-	# The sled unloads its gifts onto the table, then drives on
+	# The gifts appear on the table at the top and have to be carried down to the sled
 	table_gifts.append_array(gifts)
-	deadline_left = gift_deadline
 	queue_redraw()
+
+func _on_sled_leaving() -> void:
+	score += loaded
+	loaded = 0
+	# Gifts that never made it onto the sled make more kids angry
+	if not table_gifts.is_empty() or player.has_gift:
+		for i in penalty_kids:
+			add_random_thrower()
+	table_gifts.clear()
+	player.has_gift = false
+	queue_redraw()
+
+func _on_sled_departed() -> void:
+	sled = null
+	sled_busy = false
 
 func _draw() -> void:
 	draw_rect(Rect2(0, 0, 240, 240), Color(0.7, 0.9, 1))
-	draw_rect(Rect2(DROP_POS.x - 10, 12, 20, 8), Color(1, 0.85, 0.2, 0.6))
-	draw_rect(Rect2(TABLE_POS.x - 14, 220, 28, 8), Color(0.55, 0.35, 0.15))
+	draw_rect(Rect2(TABLE_POS.x - 24, 12, 48, 8), Color(0.55, 0.35, 0.15))
+	draw_rect(Rect2(SLED_POS.x - 24, 220, 48, 8), Color(0.2, 0.75, 0.3, 0.5))
+	var x0 := TABLE_POS.x - table_gifts.size() * 5 / 2.0
 	for i in table_gifts.size():
-		var box := Rect2(TABLE_POS.x - 12 + i * 5, 217, 4, 4)
+		var box := Rect2(x0 + i * 5, 14, 4, 4)
 		draw_rect(box, Color(0.2, 0.75, 0.3))
 		draw_rect(Rect2(box.position.x + 1.5, box.position.y, 1, 4), Color(1, 0.85, 0.2))
 

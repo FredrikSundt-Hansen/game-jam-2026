@@ -7,17 +7,19 @@ var winding_up: bool = false
 var happy: bool = false
 var flash_on: bool = false
 
-func _draw() -> void:
-	var body := Color(0.95, 0.6, 0.15)
+@onready var sprite: Sprite2D = $Sprite2D
+
+func _refresh() -> void:
 	if happy:
-		body = Color(0.4, 0.9, 0.4)
+		sprite.modulate = Color(0.6, 1.0, 0.6)
 	elif flash_on:
-		body = Color.WHITE
-	draw_rect(Rect2(-5, -5, 10, 10), body)
+		sprite.modulate = Color(1.0, 0.25, 0.25)
+	else:
+		sprite.modulate = Color.WHITE
 
 func make_happy() -> void:
 	happy = true
-	queue_redraw()
+	_refresh()
 	var tween := create_tween()
 	tween.tween_property(self, "position:y", position.y - 6.0, 0.15)
 	tween.tween_property(self, "modulate:a", 0.0, 0.4)
@@ -31,13 +33,13 @@ func throw_coal(coal_speed: float) -> void:
 	var flashes := 3
 	for i in flashes * 2:
 		flash_on = not flash_on
-		queue_redraw()
+		_refresh()
 		await get_tree().create_timer(windup_time / (flashes * 2)).timeout
 		if happy:
 			return
 	flash_on = false
 	winding_up = false
-	queue_redraw()
+	_refresh()
 	if happy:
 		return
 	var player := get_tree().get_first_node_in_group("player")

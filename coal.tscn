@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://by1gvy6voxw83" path="res://coal.gd" id="1_0sb7u"]
 
+[ext_resource type="Texture2D" uid="uid://bwapyjruyleo7" path="res://coal.png" id="2_tex"]
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_d7qkd"]
 radius = 4.0
 
@@ -9,6 +11,11 @@ radius = 4.0
 script = ExtResource("1_0sb7u")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=491548908]
+scale = Vector2(0.05, 0.05)
+texture_filter = 4
+texture = ExtResource("2_tex")
+region_enabled = true
+region_rect = Rect2(152, 170, 182, 167)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=770840722]
 shape = SubResource("CircleShape2D_d7qkd")

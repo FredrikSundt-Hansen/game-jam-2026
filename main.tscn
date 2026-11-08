@@ -15,7 +15,7 @@ script = ExtResource("1_h2yge")
 coal_scene = ExtResource("2_1bvp3")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=845182375]
-position = Vector2(120, 100)
+position = Vector2(180, 100)
 zoom = Vector2(1.5, 1.5)
 
 [node name="Player" parent="." unique_id=27816891 instance=ExtResource("1_ig7tw")]
