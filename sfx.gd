@@ -16,10 +16,20 @@ const SOUNDS := {
 
 const VOLUME_DB := -15.0
 
+# Caps how many copies of a sound can overlap
+const MAX_VOICES := {"kid_throws_coal": 5}
+
+var _active := {}
+
 func play(sound: String) -> void:
+	if _active.get(sound, 0) >= MAX_VOICES.get(sound, 999):
+		return
+	_active[sound] = _active.get(sound, 0) + 1
 	var player := AudioStreamPlayer.new()
 	player.stream = SOUNDS[sound]
 	player.volume_db = VOLUME_DB
-	player.finished.connect(player.queue_free)
+	player.finished.connect(func() -> void:
+		_active[sound] -= 1
+		player.queue_free())
 	add_child(player)
 	player.play()
