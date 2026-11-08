@@ -15,6 +15,9 @@ extends Node2D
 @export var pickup_range: float = 12.0
 @export var give_range: float = 16.0
 @export var load_range: float = 24.0
+@export var snack_interval: float = 15.0
+@export var snack_lifetime: float = 12.0
+@export var snack_range: float = 10.0
 
 const TABLE_POS := Vector2(120, 20)
 const SLED_POS := Vector2(120, 234)
@@ -37,6 +40,9 @@ var loaded: int = 0
 var sled: Sleigh = null
 var table_gifts: Array[String] = []
 var sled_busy: bool = false
+var snack_pos: Vector2 = Vector2.ZERO
+var snack_time_left: float = 0.0
+var snack_cooldown: float = 0.0
 
 func _ready() -> void:
 	var layer := CanvasLayer.new()
@@ -77,6 +83,7 @@ func _process(delta: float) -> void:
 		return
 	elapsed += delta
 	_update_gifts()
+	_update_snack(delta)
 	_update_label()
 
 func _update_label() -> void:
@@ -119,6 +126,24 @@ func _update_gifts() -> void:
 			kid.make_happy()
 			break
 
+func _update_snack(delta: float) -> void:
+	if snack_time_left > 0.0:
+		snack_time_left -= delta
+		# At full health the snack stays put until it's needed
+		if player.lives < player.max_lives and player.global_position.distance_to(snack_pos) < snack_range:
+			snack_time_left = 0.0
+			player.heal()
+		if snack_time_left <= 0.0:
+			snack_cooldown = snack_interval
+			queue_redraw()
+		return
+	snack_cooldown -= delta
+	if snack_cooldown <= 0.0:
+		# Stay clear of the walls, the table and the sled
+		snack_pos = Vector2(randf_range(30, 210), randf_range(40, 200))
+		snack_time_left = snack_lifetime
+		queue_redraw()
+
 func _call_next_sled() -> void:
 	sled_busy = true
 	await get_tree().create_timer(sled_respawn_delay).timeout
@@ -160,6 +185,10 @@ func _draw() -> void:
 	_draw_ice()
 	draw_rect(Rect2(TABLE_POS.x - 24, 12, 48, 8), Color(0.55, 0.35, 0.15))
 	draw_rect(Rect2(SLED_POS.x - 24, 220, 48, 8), Color(0.2, 0.75, 0.3, 0.5))
+	if snack_time_left > 0.0 and (snack_time_left > 3.0 or int(snack_time_left * 4) % 2 == 0):
+		draw_circle(snack_pos, 5, Color(0.75, 0.5, 0.25))
+		for o in [Vector2(-2, -1), Vector2(2, 0), Vector2(0, 2)]:
+			draw_rect(Rect2(snack_pos + o - Vector2(0.5, 0.5), Vector2(1.5, 1.5)), Color(0.3, 0.15, 0.08))
 	var x0 := TABLE_POS.x - table_gifts.size() * 5 / 2.0
 	for i in table_gifts.size():
 		var box := Rect2(x0 + i * 5, 14, 4, 4)

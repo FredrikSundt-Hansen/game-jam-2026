@@ -58,6 +58,12 @@ func _animate(input_dir: Vector2, delta: float) -> void:
 		walk_time = 0.0
 	sprite.frame = facing_row * 4 + column
 
+func heal() -> void:
+	if dead:
+		return
+	lives = mini(lives + 1, max_lives)
+	hit.emit(lives)
+
 func take_damage() -> void:
 	if invulnerable or dead:
 		return
