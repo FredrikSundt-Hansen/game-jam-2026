@@ -29,13 +29,20 @@ func show_gifts(gift_names: Array[String]) -> void:
 func mark_random_done() -> void:
 	var open_items: Array[Label] = []
 	for label: Label in _items_container.get_children():
-		if label.text.begins_with("• ") and not label.is_queued_for_deletion():
+		if label.get_child_count() == 0 and not label.is_queued_for_deletion():
 			open_items.append(label)
 	if open_items.is_empty():
 		return
 	var chosen: Label = open_items.pick_random()
-	chosen.text = "✓ " + chosen.text.trim_prefix("• ")
+	chosen.text = chosen.text.trim_prefix("• ")
 	chosen.modulate = Color(0.2, 0.55, 0.25, 0.7)
+	# Labels have no built-in strikethrough (and glyph-based ones break in exports), so draw a line.
+	var line := ColorRect.new()
+	line.color = Color(0.13, 0.11, 0.1, 1)
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.size = Vector2(chosen.get_minimum_size().x, 1)
+	line.position = Vector2(0, roundf(chosen.get_minimum_size().y / 2.0))
+	chosen.add_child(line)
 
 
 func clear() -> void:

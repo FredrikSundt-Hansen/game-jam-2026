@@ -41,7 +41,7 @@ func _ready() -> void:
 	bg.color = Color(0.08, 0.1, 0.18)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
-	title = _make_label("SANTA'S\nCOAL DODGE", 36, Vector2(0, 50), Color(0.9, 0.15, 0.2))
+	title = _make_label("SANTA COAL", 36, Vector2(0, 50), Color(0.9, 0.15, 0.2))
 	for i in options.size():
 		option_labels.append(_make_label("", 24, Vector2(0, 220 + i * 44), Color.WHITE))
 	hint = _make_label("Up/Down + Enter", 12, Vector2(0, 380), Color(0.7, 0.9, 1))
