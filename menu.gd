@@ -96,5 +96,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if selected == 0:
 			get_tree().change_scene_to_file(GAME_SCENE)
 		else:
+			Sfx.play("help_menu_open")
 			in_guide = true
 			_refresh()

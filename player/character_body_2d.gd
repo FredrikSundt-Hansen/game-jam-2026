@@ -69,6 +69,7 @@ func heal() -> void:
 func take_damage() -> void:
 	if invulnerable or dead:
 		return
+	Sfx.play("coal_hit")
 	lives -= 1
 	hit.emit(lives)
 	if lives <= 0:

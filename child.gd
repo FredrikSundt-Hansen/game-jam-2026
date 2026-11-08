@@ -51,4 +51,5 @@ func throw_coal(coal_speed: float) -> void:
 	coal.global_position = global_position
 	coal.direction = aim
 	coal.speed = coal_speed
+	Sfx.play("kid_throws_coal")
 	get_parent().add_child(coal)

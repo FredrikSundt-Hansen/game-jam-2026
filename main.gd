@@ -141,6 +141,7 @@ func _update_gifts() -> void:
 	var sleigh_waiting := sleigh != null and sleigh.is_waiting()
 	if not table_gifts.is_empty() and not player.has_gift \
 			and player.global_position.distance_to(TABLE_POS) < pickup_range:
+		Sfx.play("pick_up_gift")
 		player.gift_name = table_gifts.pop_front()
 		player.has_gift = true
 		queue_redraw()
@@ -154,6 +155,7 @@ func _update_gifts() -> void:
 		return
 	if sleigh_waiting and player.global_position.distance_to(SLEIGH_POS) < load_range:
 		# Gifts loaded onto the sleigh count as points once the sleigh leaves
+		Sfx.play("santa_deliver_gift")
 		player.has_gift = false
 		loaded += 1
 		wish_list.mark_random_done()
@@ -162,6 +164,7 @@ func _update_gifts() -> void:
 	for kid in kids:
 		if player.global_position.distance_to(kid.global_position) < give_range:
 			# Giving a gift to a child makes it happy and removes it, but scores nothing
+			Sfx.play("kid_recieves_gift")
 			player.has_gift = false
 			kids.erase(kid)
 			kid.make_happy()
@@ -180,6 +183,7 @@ func _update_snack(delta: float) -> void:
 		# At full health the snack stays put until it's needed
 		if player.lives < player.max_lives and player.global_position.distance_to(snack_pos) < snack_range:
 			snack_time_left = 0.0
+			Sfx.play("santa_eat_snack")
 			player.heal()
 		if snack_time_left <= 0.0:
 			snack_cooldown = snack_interval
@@ -212,10 +216,13 @@ func _call_next_sleigh() -> void:
 
 func _on_sleigh_arrived(gifts: Array[String]) -> void:
 	# The gifts appear on the table at the top and have to be carried down to the sleigh
+	Sfx.play("sleigh_arrives")
 	table_gifts.append_array(gifts)
 	queue_redraw()
 
 func _on_sleigh_leaving() -> void:
+	if loaded > 0:
+		Sfx.play("points")
 	score += loaded
 	loaded = 0
 	# Gifts that never made it onto the sleigh make more kids angry
@@ -306,6 +313,7 @@ func add_random_thrower() -> void:
 				break
 		if free:
 			break
+	Sfx.play("new_kid_arrives")
 	var kid := _spawn_kid(pos)
 	kid.scale = Vector2.ZERO
 	create_tween().tween_property(kid, "scale", Vector2.ONE, 0.3) \
