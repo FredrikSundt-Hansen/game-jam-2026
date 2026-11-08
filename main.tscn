@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://bmm1r78c7enpt"]
+
+[ext_resource type="Script" uid="uid://btxxaaah8o3fu" path="res://main.gd" id="1_h2yge"]
+[ext_resource type="PackedScene" uid="uid://dprcjdwnwgtn" path="res://player.tscn" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://bh7bwmlphpx1a" path="res://coal.tscn" id="2_1bvp3"]
+
+[sub_resource type="RectangleShape2D" id="Wall_H"]
+size = Vector2(240, 12)
+
+[sub_resource type="RectangleShape2D" id="Wall_V"]
+size = Vector2(12, 240)
+
+[node name="Main" type="Node2D" unique_id=1034566543]
+script = ExtResource("1_h2yge")
+coal_scene = ExtResource("2_1bvp3")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=845182375]
+position = Vector2(120, 100)
+zoom = Vector2(1.5, 1.5)
+
+[node name="Player" parent="." unique_id=27816891 instance=ExtResource("1_ig7tw")]
+position = Vector2(120, 120)
+
+[node name="WallTop" type="StaticBody2D" parent="." unique_id=2006099692]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallTop" unique_id=191232481]
+position = Vector2(120, 6)
+shape = SubResource("Wall_H")
+
+[node name="ColorRect" type="ColorRect" parent="WallTop" unique_id=370701183]
+offset_right = 240.0
+offset_bottom = 12.0
+color = Color(0.2, 0.35, 0.55, 1)
+
+[node name="WallBottom" type="StaticBody2D" parent="." unique_id=1448238269]
+position = Vector2(0, 228)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallBottom" unique_id=1710085067]
+position = Vector2(120, 6)
+shape = SubResource("Wall_H")
+
+[node name="ColorRect" type="ColorRect" parent="WallBottom" unique_id=1468616832]
+offset_right = 240.0
+offset_bottom = 12.0
+color = Color(0.2, 0.35, 0.55, 1)
+
+[node name="WallLeft" type="StaticBody2D" parent="." unique_id=1557775298]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallLeft" unique_id=857396223]
+position = Vector2(6, 120)
+shape = SubResource("Wall_V")
+
+[node name="ColorRect" type="ColorRect" parent="WallLeft" unique_id=1586325634]
+offset_right = 12.0
+offset_bottom = 240.0
+color = Color(0.2, 0.35, 0.55, 1)
+
+[node name="WallRight" type="StaticBody2D" parent="." unique_id=997879453]
+position = Vector2(228, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight" unique_id=557998342]
+position = Vector2(6, 120)
+shape = SubResource("Wall_V")
+
+[node name="ColorRect" type="ColorRect" parent="WallRight" unique_id=1216430820]
+offset_right = 12.0
+offset_bottom = 240.0
+color = Color(0.2, 0.35, 0.55, 1)
+
+[node name="CoalTimer" type="Timer" parent="." unique_id=277976016]
+wait_time = 0.8
+autostart = true
+
+[connection signal="timeout" from="CoalTimer" to="." method="_on_coal_timer_timeout"]

@@ -1,0 +1,209 @@
+extends Node2D
+
+@export var coal_scene: PackedScene
+@export var start_wait: float = 2.0
+@export var min_wait: float = 0.7
+@export var wait_decay_per_second: float = 0.02
+@export var start_coal_speed: float = 45.0
+@export var max_coal_speed: float = 90.0
+@export var start_children: int = 5
+@export var sled_gift_count: int = 5
+@export var sled_stay_duration: float = 1.5
+@export var sled_respawn_delay: float = 1.0
+@export var gift_deadline: float = 45.0
+@export var penalty_kids: int = 1
+@export var max_kids: int = 10
+@export var pickup_range: float = 12.0
+@export var give_range: float = 16.0
+
+const TABLE_POS := Vector2(120, 220)
+const SLED_POS := Vector2(120, 234)
+const DROP_POS := Vector2(120, 20)
+
+const ChildScene := preload("res://child.tscn")
+const SledScene := preload("res://sleigh.tscn")
+
+@onready var player: CharacterBody2D = $Player
+@onready var coal_timer: Timer = $CoalTimer
+
+var elapsed: float = 0.0
+var game_over: bool = false
+var label: Label
+var message: Label
+var kids: Array = []
+var score: int = 0
+var deadline_left: float = -1.0
+var table_gifts: Array[String] = []
+var sled_busy: bool = false
+
+func _ready() -> void:
+	var layer := CanvasLayer.new()
+	label = Label.new()
+	label.position = Vector2(24, 10)
+	label.add_theme_font_size_override("font_size", 15)
+	layer.add_child(label)
+	message = Label.new()
+	message.position = Vector2(0, 60)
+	message.size = Vector2(360, 360)
+	message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	message.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	message.add_theme_font_size_override("font_size", 21)
+	message.add_theme_color_override("font_color", Color.WHITE)
+	message.add_theme_color_override("font_outline_color", Color.BLACK)
+	message.add_theme_constant_override("outline_size", 6)
+	layer.add_child(message)
+	add_child(layer)
+	player.hit.connect(func(_l): _update_label())
+	player.died.connect(_on_player_died)
+	coal_timer.wait_time = start_wait
+	for i in start_children:
+		add_child_thrower(i)
+	_update_label()
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F11:
+		var fs := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if fs else DisplayServer.WINDOW_MODE_FULLSCREEN)
+
+func _process(delta: float) -> void:
+	if game_over:
+		if Input.is_action_just_pressed("ui_accept"):
+			get_tree().reload_current_scene()
+		return
+	elapsed += delta
+	_update_gifts()
+	_update_deadline(delta)
+	_update_label()
+
+func _update_label() -> void:
+	if game_over:
+		message.text = "Game over!\nScore %d\nSurvived %.1fs\n\nPress Space/Enter to restart" % [score, elapsed]
+		label.text = ""
+		return
+	var text := "Lives: %d  Score: %d" % [player.lives, score]
+	if deadline_left > 0.0:
+		text += "\nDeliver in: %d" % ceili(deadline_left)
+	label.text = text
+
+func _update_gifts() -> void:
+	if not table_gifts.is_empty() and not player.has_gift \
+			and player.global_position.distance_to(TABLE_POS) < pickup_range:
+		player.gift_name = table_gifts.pop_front()
+		player.has_gift = true
+		queue_redraw()
+	if table_gifts.is_empty() and not player.has_gift:
+		deadline_left = -1.0
+		if not sled_busy:
+			_call_next_sled()
+	if not player.has_gift:
+		return
+	if player.global_position.distance_to(DROP_POS) < give_range:
+		# Carrying a gift over to the other side is the only way to score
+		player.has_gift = false
+		score += 1
+		return
+	for kid in kids:
+		if player.global_position.distance_to(kid.global_position) < give_range:
+			# Giving a gift to a child makes it happy and removes it, but scores nothing
+			player.has_gift = false
+			kids.erase(kid)
+			kid.make_happy()
+			break
+
+func _update_deadline(delta: float) -> void:
+	if deadline_left <= 0.0:
+		return
+	deadline_left -= delta
+	if deadline_left <= 0.0:
+		# Gifts weren't carried over in time, so more angry kids show up
+		for i in penalty_kids:
+			add_random_thrower()
+		deadline_left = gift_deadline
+
+func _call_next_sled() -> void:
+	sled_busy = true
+	await get_tree().create_timer(sled_respawn_delay).timeout
+	if game_over:
+		return
+	var sled := SledScene.instantiate()
+	sled.stay_duration = sled_stay_duration
+	sled.wish_list_size = sled_gift_count
+	sled.position = SLED_POS
+	sled.arrived.connect(_on_sled_arrived)
+	sled.departed.connect(func() -> void: sled_busy = false)
+	add_child(sled)
+
+func _on_sled_arrived(gifts: Array[String]) -> void:
+	# The sled unloads its gifts onto the table, then drives on
+	table_gifts.append_array(gifts)
+	deadline_left = gift_deadline
+	queue_redraw()
+
+func _draw() -> void:
+	draw_rect(Rect2(0, 0, 240, 240), Color(0.7, 0.9, 1))
+	draw_rect(Rect2(DROP_POS.x - 10, 12, 20, 8), Color(1, 0.85, 0.2, 0.6))
+	draw_rect(Rect2(TABLE_POS.x - 14, 220, 28, 8), Color(0.55, 0.35, 0.15))
+	for i in table_gifts.size():
+		var box := Rect2(TABLE_POS.x - 12 + i * 5, 217, 4, 4)
+		draw_rect(box, Color(0.2, 0.75, 0.3))
+		draw_rect(Rect2(box.position.x + 1.5, box.position.y, 1, 4), Color(1, 0.85, 0.2))
+
+func _on_player_died() -> void:
+	game_over = true
+	coal_timer.stop()
+	_update_label()
+
+func _difficulty() -> float:
+	return clampf(elapsed / 60.0, 0.0, 1.0)
+
+func _on_coal_timer_timeout() -> void:
+	if game_over or kids.is_empty():
+		return
+	# The wait is tuned for start_children kids; fewer kids means fewer throws overall
+	var base_wait := maxf(min_wait, start_wait - elapsed * wait_decay_per_second)
+	coal_timer.wait_time = base_wait * start_children / float(kids.size())
+	# Later in the run, sometimes several kids throw at once
+	var count := 1 + int(randf() < _difficulty() * 0.6) + int(randf() < _difficulty() * 0.3)
+	var throwers := kids.duplicate()
+	throwers.shuffle()
+	var coal_speed := lerpf(start_coal_speed, max_coal_speed, _difficulty())
+	for i in mini(count, throwers.size()):
+		throwers[i].throw_coal(coal_speed)
+
+func add_child_thrower(index: int) -> void:
+	# Alternate left/right walls, spreading kids evenly along each wall's height
+	var left := index % 2 == 0
+	var side_index := index / 2
+	var side_count := (start_children + (1 if left else 0)) / 2
+	var y := lerpf(36.0, 204.0, (side_index + 0.5) / side_count)
+	_spawn_kid(Vector2(6.0 if left else 234.0, y))
+
+func add_random_thrower() -> void:
+	if kids.size() >= max_kids:
+		return
+	var pos := Vector2.ZERO
+	for i in 30:
+		pos = Vector2(6.0 if randf() < 0.5 else 234.0, randf_range(36.0, 204.0))
+		var free := true
+		for kid in kids:
+			if kid.position.distance_to(pos) < 16.0:
+				free = false
+				break
+		if free:
+			break
+	var kid := _spawn_kid(pos)
+	kid.scale = Vector2.ZERO
+	create_tween().tween_property(kid, "scale", Vector2.ONE, 0.3) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func _spawn_kid(pos: Vector2) -> Node2D:
+	var kid := ChildScene.instantiate()
+	kid.coal_scene = coal_scene
+	kid.position = pos
+	add_child(kid)
+	kids.append(kid)
+	return kid
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"): # "ui_cancel" is bound to Esc by default
+		get_tree().quit()

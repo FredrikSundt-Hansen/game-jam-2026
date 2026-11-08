@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="GiftCatalog" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://gift_catalog.gd" id="1_cat"]
+
+[resource]
+script = ExtResource("1_cat")
+gift_names = Array[String](["Teddy Bear", "Toy Train", "Wooden Sled", "Puzzle", "Board Game", "Doll House", "Kite", "Scarf", "Mittens", "Storybook", "Paint Set", "Snow Globe", "Rocking Horse", "Toy Robot", "Candy Cane", "Hot Cocoa Mug", "Yo-Yo", "Building Blocks"])
