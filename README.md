@@ -36,4 +36,12 @@ Santa slides on ice in a square arena, dodging coal thrown by angry children whi
 
    Then open <http://localhost:8000>.
 
+To export from the command line instead, run:
+
+```sh
+./export.sh
+```
+
+It looks for `godot` on the `PATH` or in `/Applications/Godot.app`; set `GODOT=/path/to/godot` to override. It writes to `export/` inside the project, which is git-ignored.
+
 The exported files can be hosted on any static host, such as itch.io (upload as a zip with `index.html` at its root) or GitHub Pages.
