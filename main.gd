@@ -24,6 +24,7 @@ const SLEIGH_POS := Vector2(120, 234)
 
 const ChildScene := preload("res://child.tscn")
 const SleighScene := preload("res://sleigh.tscn")
+const CandyCane := preload("res://candy_cane.png")
 const WishListScene := preload("res://wish_list.tscn")
 
 @onready var player: CharacterBody2D = $Player
@@ -214,9 +215,7 @@ func _draw() -> void:
 	draw_rect(Rect2(TABLE_POS.x - 24, 12, 48, 8), Color(0.55, 0.35, 0.15))
 	draw_rect(Rect2(SLEIGH_POS.x - 24, 220, 48, 8), Color(0.2, 0.75, 0.3, 0.5))
 	if snack_time_left > 0.0 and (snack_time_left > 3.0 or int(snack_time_left * 4) % 2 == 0):
-		draw_circle(snack_pos, 5, Color(0.75, 0.5, 0.25))
-		for o in [Vector2(-2, -1), Vector2(2, 0), Vector2(0, 2)]:
-			draw_rect(Rect2(snack_pos + o - Vector2(0.5, 0.5), Vector2(1.5, 1.5)), Color(0.3, 0.15, 0.08))
+		draw_texture_rect(CandyCane, Rect2(snack_pos - Vector2(3.5, 7), Vector2(7, 14)), false)
 	var x0 := TABLE_POS.x - table_gifts.size() * 5 / 2.0
 	for i in table_gifts.size():
 		var box := Rect2(x0 + i * 5, 14, 4, 4)
