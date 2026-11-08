@@ -28,7 +28,7 @@ extends Node2D
 @export var snack_range: float = 10.0
 
 const TABLE_POS := Vector2(120, 20)
-const SLEIGH_POS := Vector2(120, 234)
+const SLEIGH_POS := Vector2(120, 226)
 
 const ChildScene := preload("res://child.tscn")
 const SleighScene := preload("res://sleigh.tscn")

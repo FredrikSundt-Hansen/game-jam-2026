@@ -25,8 +25,10 @@ signal departed
 ## Where the gifts are picked from.
 @export var gift_catalog: GiftCatalog = preload("res://gift_catalog.tres")
 
+const SleighTexture := preload("res://sleigh.png")
+
 @export_group("Look")
-@export var sleigh_size: Vector2 = Vector2(40, 12)
+@export var sleigh_size: Vector2 = Vector2(56, 26)
 @export var color: Color = Color(0.75, 0.15, 0.15)
 
 ## How many gifts are stacked on the sleigh; they travel with it when it leaves.
@@ -48,11 +50,12 @@ func _ready() -> void:
 
 
 func _draw() -> void:
-	# Placeholder art, drawn centered on the node's position.
-	draw_rect(Rect2(-sleigh_size / 2.0, sleigh_size), color)
+	# Drawn centered on the node's position.
+	var size := SleighTexture.get_size()
+	draw_texture(SleighTexture, -size / 2.0)
 	var x0 := -loaded_gifts * 5 / 2.0
 	for i in loaded_gifts:
-		var box := Rect2(x0 + i * 5, -sleigh_size.y / 2.0 - 4, 4, 4)
+		var box := Rect2(x0 + i * 5, -size.y / 2.0 + 2, 4, 4)
 		draw_rect(box, Color(0.2, 0.75, 0.3))
 		draw_rect(Rect2(box.position.x + 1.5, box.position.y, 1, 4), Color(1, 0.85, 0.2))
 
