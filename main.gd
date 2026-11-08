@@ -72,13 +72,9 @@ func _ready() -> void:
 	hearts.position = Vector2(190, 12)
 	hearts.draw.connect(_draw_hearts)
 	layer.add_child(hearts)
-	sleigh_label = Label.new()
-	sleigh_label.position = Vector2(24, 402)
-	sleigh_label.add_theme_font_size_override("font_size", 12)
-	sleigh_label.add_theme_color_override("font_color", Color.WHITE)
-	sleigh_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	sleigh_label.add_theme_constant_override("outline_size", 4)
-	layer.add_child(sleigh_label)
+	sleigh_label = _make_sign(layer, "", Vector2(8, 400), false)
+	sleigh_label.get_parent().hide()
+	_make_sign(layer, "NORTH POLE", Vector2(352, 400), true)
 	message = Label.new()
 	message.position = Vector2(0, 60)
 	message.size = Vector2(360, 360)
@@ -117,12 +113,38 @@ func _process(delta: float) -> void:
 	_update_kid_arrivals(delta)
 	_update_label()
 
+# A little wooden sign in the bottom wall; right-aligned signs grow leftward from pos
+func _make_sign(layer: CanvasLayer, text: String, pos: Vector2, align_right: bool) -> Label:
+	var panel := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.55, 0.35, 0.15)
+	style.border_color = Color(0.3, 0.17, 0.07)
+	style.set_border_width_all(2)
+	style.content_margin_left = 6
+	style.content_margin_right = 6
+	style.content_margin_top = 0
+	style.content_margin_bottom = 0
+	panel.add_theme_stylebox_override("panel", style)
+	panel.position = pos
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 11)
+	l.add_theme_color_override("font_color", Color.WHITE)
+	l.add_theme_color_override("font_outline_color", Color.BLACK)
+	l.add_theme_constant_override("outline_size", 3)
+	panel.add_child(l)
+	layer.add_child(panel)
+	if align_right:
+		panel.resized.connect(func() -> void: panel.position.x = pos.x - panel.size.x)
+	return l
+
 func _update_label() -> void:
 	hearts.queue_redraw()
 	if game_over:
 		message.text = "Game over!\nScore %d\nSurvived %.1fs\n\nPress Space/Enter to restart" % [score, elapsed]
 		label.text = ""
 		sleigh_label.text = ""
+		sleigh_label.get_parent().hide()
 		return
 	label.text = "Score: %d" % score
 	if sleigh != null and sleigh.is_waiting():
@@ -130,8 +152,10 @@ func _update_label() -> void:
 		sleigh_label.text = "SLEIGH LEAVES IN %ds" % secs
 		var urgent := secs <= 10 and int(elapsed * 3) % 2 == 0
 		sleigh_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3) if urgent else Color.WHITE)
+		sleigh_label.get_parent().show()
 	else:
 		sleigh_label.text = ""
+		sleigh_label.get_parent().hide()
 
 func _draw_hearts() -> void:
 	const SHAPE := ["01100110", "11111111", "11111111", "01111110", "00111100", "00011000"]
