@@ -15,9 +15,10 @@ extends Node2D
 @export var kid_arrival_decay: float = 0.1
 @export var sleigh_gift_min: int = 2
 @export var sleigh_gift_max: int = 4
-@export var gifts_per_round: int = 1 # raises both the minimum and maximum each round
-@export var max_sleigh_gifts: int = 12
-@export var sleigh_stay_duration: float = 60.0
+@export var gifts_per_round: float = 1.5 # raises the minimum each round
+@export var gift_spread_per_round: float = 0.5 # widens the random range each round
+@export var max_sleigh_gifts: int = 14
+@export var sleigh_stay_duration: float = 30.0
 @export var sleigh_respawn_delay: float = 1.0
 @export var penalty_kids: int = 1
 @export var max_kids: int = 10
@@ -205,8 +206,9 @@ func _call_next_sleigh() -> void:
 		return
 	sleigh = SleighScene.instantiate()
 	sleigh.stay_duration = sleigh_stay_duration
-	var growth := rounds * gifts_per_round
-	sleigh.wish_list_size = mini(randi_range(sleigh_gift_min + growth, sleigh_gift_max + growth), max_sleigh_gifts)
+	var low := sleigh_gift_min + int(rounds * gifts_per_round)
+	var high := sleigh_gift_max + int(rounds * (gifts_per_round + gift_spread_per_round))
+	sleigh.wish_list_size = mini(randi_range(low, high), max_sleigh_gifts)
 	rounds += 1
 	sleigh.position = SLEIGH_POS
 	sleigh.arrived.connect(_on_sleigh_arrived)
@@ -244,7 +246,7 @@ func _on_sleigh_departed() -> void:
 func _draw() -> void:
 	draw_rect(Rect2(0, 0, 240, 240), Color(0.7, 0.9, 1))
 	_draw_ice()
-	draw_rect(Rect2(TABLE_POS.x - 24, 12, 48, 8), Color(0.55, 0.35, 0.15))
+	draw_rect(Rect2(TABLE_POS.x - 40, 12, 80, 8), Color(0.55, 0.35, 0.15))
 	draw_rect(Rect2(SLEIGH_POS.x - 24, 220, 48, 8), Color(0.2, 0.75, 0.3, 0.5))
 	if snack_time_left > 0.0 and (snack_time_left > 3.0 or int(snack_time_left * 4) % 2 == 0):
 		draw_texture_rect(CandyCane, Rect2(snack_pos - Vector2(3.5, 7), Vector2(7, 14)), false)
