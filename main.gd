@@ -6,8 +6,16 @@ extends Node2D
 @export var wait_decay_per_second: float = 0.02
 @export var start_coal_speed: float = 45.0
 @export var max_coal_speed: float = 90.0
-@export var start_children: int = 5
-@export var sleigh_gift_count: int = 8
+@export var start_children: int = 1
+@export var reference_kids: int = 5
+@export var max_coal_wait: float = 3.5
+@export var kid_arrival_start: float = 15.0
+@export var kid_arrival_min: float = 4.0
+@export var kid_arrival_decay: float = 0.1
+@export var sleigh_gift_min: int = 2
+@export var sleigh_gift_max: int = 4
+@export var gifts_per_round: int = 1 # raises both the minimum and maximum each round
+@export var max_sleigh_gifts: int = 12
 @export var sleigh_stay_duration: float = 60.0
 @export var sleigh_respawn_delay: float = 1.0
 @export var penalty_kids: int = 1
@@ -43,6 +51,8 @@ var loaded: int = 0
 var sleigh: Sleigh = null
 var table_gifts: Array[String] = []
 var sleigh_busy: bool = false
+var rounds: int = 0
+var next_kid_in: float = 0.0
 var snack_pos: Vector2 = Vector2.ZERO
 var snack_time_left: float = 0.0
 var snack_cooldown: float = 0.0
@@ -81,6 +91,7 @@ func _ready() -> void:
 	player.hit.connect(func(_l): _update_label())
 	player.died.connect(_on_player_died)
 	coal_timer.wait_time = start_wait
+	next_kid_in = kid_arrival_start
 	for i in start_children:
 		add_child_thrower(i)
 	_update_label()
@@ -98,6 +109,7 @@ func _process(delta: float) -> void:
 	elapsed += delta
 	_update_gifts()
 	_update_snack(delta)
+	_update_kid_arrivals(delta)
 	_update_label()
 
 func _update_label() -> void:
@@ -155,6 +167,13 @@ func _update_gifts() -> void:
 			kid.make_happy()
 			break
 
+func _update_kid_arrivals(delta: float) -> void:
+	next_kid_in -= delta
+	if next_kid_in <= 0.0:
+		add_random_thrower()
+		# Children arrive faster and faster
+		next_kid_in = maxf(kid_arrival_min, kid_arrival_start - elapsed * kid_arrival_decay)
+
 func _update_snack(delta: float) -> void:
 	if snack_time_left > 0.0:
 		snack_time_left -= delta
@@ -180,7 +199,9 @@ func _call_next_sleigh() -> void:
 		return
 	sleigh = SleighScene.instantiate()
 	sleigh.stay_duration = sleigh_stay_duration
-	sleigh.wish_list_size = sleigh_gift_count
+	var growth := rounds * gifts_per_round
+	sleigh.wish_list_size = mini(randi_range(sleigh_gift_min + growth, sleigh_gift_max + growth), max_sleigh_gifts)
+	rounds += 1
 	sleigh.position = SLEIGH_POS
 	sleigh.arrived.connect(_on_sleigh_arrived)
 	sleigh.wish_list_rolled.connect(wish_list.show_gifts)
@@ -253,9 +274,9 @@ func _difficulty() -> float:
 func _on_coal_timer_timeout() -> void:
 	if game_over or kids.is_empty():
 		return
-	# The wait is tuned for start_children kids; fewer kids means fewer throws overall
+	# The wait is tuned for reference_kids kids; fewer kids means fewer throws overall
 	var base_wait := maxf(min_wait, start_wait - elapsed * wait_decay_per_second)
-	coal_timer.wait_time = base_wait * start_children / float(kids.size())
+	coal_timer.wait_time = minf(max_coal_wait, base_wait * reference_kids / float(kids.size()))
 	# Later in the run, sometimes several kids throw at once
 	var count := 1 + int(randf() < _difficulty() * 0.6) + int(randf() < _difficulty() * 0.3)
 	var throwers := kids.duplicate()
