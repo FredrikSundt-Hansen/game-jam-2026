@@ -32,6 +32,8 @@ const WishListScene := preload("res://wish_list.tscn")
 var elapsed: float = 0.0
 var game_over: bool = false
 var label: Label
+var sled_label: Label
+var hearts: Control
 var wish_list: WishList
 var message: Label
 var kids: Array = []
@@ -50,6 +52,17 @@ func _ready() -> void:
 	label.position = Vector2(24, 10)
 	label.add_theme_font_size_override("font_size", 15)
 	layer.add_child(label)
+	hearts = Control.new()
+	hearts.position = Vector2(190, 12)
+	hearts.draw.connect(_draw_hearts)
+	layer.add_child(hearts)
+	sled_label = Label.new()
+	sled_label.position = Vector2(22, 392)
+	sled_label.add_theme_font_size_override("font_size", 15)
+	sled_label.add_theme_color_override("font_color", Color.WHITE)
+	sled_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	sled_label.add_theme_constant_override("outline_size", 4)
+	layer.add_child(sled_label)
 	message = Label.new()
 	message.position = Vector2(0, 60)
 	message.size = Vector2(360, 360)
@@ -87,14 +100,26 @@ func _process(delta: float) -> void:
 	_update_label()
 
 func _update_label() -> void:
+	hearts.queue_redraw()
 	if game_over:
 		message.text = "Game over!\nScore %d\nSurvived %.1fs\n\nPress Space/Enter to restart" % [score, elapsed]
 		label.text = ""
+		sled_label.text = ""
 		return
-	var text := "Lives: %d  Score: %d" % [player.lives, score]
+	label.text = "Score: %d" % score
 	if sled != null and sled.is_waiting():
-		text += "\nSled leaves in: %d" % ceili(sled.get_time_left())
-	label.text = text
+		sled_label.text = "Sled leaves in: %d" % ceili(sled.get_time_left())
+	else:
+		sled_label.text = ""
+
+func _draw_hearts() -> void:
+	const SHAPE := ["01100110", "11111111", "11111111", "01111110", "00111100", "00011000"]
+	for i in player.max_lives:
+		var color := Color(0.9, 0.1, 0.15) if i < player.lives else Color(0.25, 0.1, 0.12)
+		for y in SHAPE.size():
+			for x in 8:
+				if SHAPE[y][x] == "1":
+					hearts.draw_rect(Rect2(i * 30 + x * 3, y * 3, 3, 3), color)
 
 func _update_gifts() -> void:
 	var sled_waiting := sled != null and sled.is_waiting()
