@@ -12,7 +12,7 @@ signal died
 @export var size_per_level: float = 0.15
 @export var field_radius_base: float = 24.0
 @export var field_radius_per_level: float = 10.0
-@export var field_strength: float = 10.0 # how fast coal turns to flow around Santa
+@export var field_strength: float = 400.0 # gravity pull on coal; negative pushes it away
 
 var lives: int
 var size_level: int = 0
