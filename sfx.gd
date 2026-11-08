@@ -14,9 +14,12 @@ const SOUNDS := {
 	"sleigh_arrives": preload("res://sounds/sleigh_arrives.mp3"),
 }
 
+const VOLUME_DB := -8.0
+
 func play(sound: String) -> void:
 	var player := AudioStreamPlayer.new()
 	player.stream = SOUNDS[sound]
+	player.volume_db = VOLUME_DB
 	player.finished.connect(player.queue_free)
 	add_child(player)
 	player.play()
