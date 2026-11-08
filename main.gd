@@ -74,7 +74,6 @@ func _ready() -> void:
 	layer.add_child(hearts)
 	sleigh_label = _make_sign(layer, "", Vector2(8, 400), false)
 	sleigh_label.get_parent().hide()
-	_make_sign(layer, "NORTH POLE", Vector2(352, 400), true)
 	message = Label.new()
 	message.position = Vector2(0, 60)
 	message.size = Vector2(360, 360)
