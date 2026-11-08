@@ -132,7 +132,19 @@ func _make_sign(layer: CanvasLayer, text: String, pos: Vector2, align_right: boo
 	l.add_theme_color_override("font_color", Color.WHITE)
 	l.add_theme_color_override("font_outline_color", Color.BLACK)
 	l.add_theme_constant_override("outline_size", 3)
-	panel.add_child(l)
+	if align_right:
+		var box := HBoxContainer.new()
+		box.add_theme_constant_override("separation", 4)
+		var arrow := Control.new()
+		arrow.custom_minimum_size = Vector2(12, 14)
+		arrow.draw.connect(func() -> void:
+			arrow.draw_rect(Rect2(0, 5, 7, 4), Color.WHITE)
+			arrow.draw_colored_polygon(PackedVector2Array([Vector2(6, 1), Vector2(12, 7), Vector2(6, 13)]), Color.WHITE))
+		box.add_child(l)
+		box.add_child(arrow)
+		panel.add_child(box)
+	else:
+		panel.add_child(l)
 	layer.add_child(panel)
 	if align_right:
 		panel.resized.connect(func() -> void: panel.position.x = pos.x - panel.size.x)
