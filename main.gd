@@ -4,8 +4,9 @@ extends Node2D
 @export var start_wait: float = 2.0
 @export var min_wait: float = 0.7
 @export var wait_decay_per_second: float = 0.02
-@export var start_coal_speed: float = 45.0
-@export var max_coal_speed: float = 90.0
+@export var start_coal_speed: float = 70.0
+@export var max_coal_speed: float = 180.0
+@export var coal_speed_per_sleigh: float = 12.0
 @export var start_children: int = 1
 @export var reference_kids: int = 5
 @export var max_coal_wait: float = 3.5
@@ -52,6 +53,7 @@ var sleigh: Sleigh = null
 var table_gifts: Array[String] = []
 var sleigh_busy: bool = false
 var rounds: int = 0
+var sleighs_departed: int = 0
 var next_kid_in: float = 0.0
 var snack_pos: Vector2 = Vector2.ZERO
 var snack_time_left: float = 0.0
@@ -235,6 +237,7 @@ func _on_sleigh_leaving() -> void:
 	queue_redraw()
 
 func _on_sleigh_departed() -> void:
+	sleighs_departed += 1
 	sleigh = null
 	sleigh_busy = false
 
@@ -289,7 +292,7 @@ func _on_coal_timer_timeout() -> void:
 	var count := 1 + int(randf() < _difficulty() * 0.6) + int(randf() < _difficulty() * 0.3)
 	var throwers := kids.duplicate()
 	throwers.shuffle()
-	var coal_speed := lerpf(start_coal_speed, max_coal_speed, _difficulty())
+	var coal_speed := minf(max_coal_speed, start_coal_speed + sleighs_departed * coal_speed_per_sleigh)
 	for i in mini(count, throwers.size()):
 		throwers[i].throw_coal(coal_speed)
 
