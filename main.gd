@@ -330,4 +330,4 @@ func _spawn_kid(pos: Vector2) -> Node2D:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"): # "ui_cancel" is bound to Esc by default
-		get_tree().quit()
+		get_tree().change_scene_to_file("res://menu.tscn")
