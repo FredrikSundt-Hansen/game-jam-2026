@@ -45,7 +45,7 @@ func _ready() -> void:
 	for i in options.size():
 		option_labels.append(_make_label("", 24, Vector2(0, 220 + i * 44), Color.WHITE))
 	hint = _make_label("Up/Down + Enter", 12, Vector2(0, 380), Color(0.7, 0.9, 1))
-	guide = _make_label(GUIDE_TEXT, 13, Vector2(0, 10), Color.WHITE)
+	guide = _make_label(GUIDE_TEXT, 12, Vector2(0, 4), Color.WHITE)
 	guide.visible = false
 	_refresh()
 
