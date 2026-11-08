@@ -8,7 +8,7 @@ Santa slides on ice!
 
 1. Pick up gifts at the
    table (top).
-2. Carry them to the sled
+2. Carry them to the sleigh
    (bottom) before it leaves.
 3. Loaded gifts = points.
 4. Or give a gift to an angry

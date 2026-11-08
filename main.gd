@@ -57,8 +57,8 @@ func _ready() -> void:
 	hearts.draw.connect(_draw_hearts)
 	layer.add_child(hearts)
 	sled_label = Label.new()
-	sled_label.position = Vector2(22, 392)
-	sled_label.add_theme_font_size_override("font_size", 15)
+	sled_label.position = Vector2(24, 402)
+	sled_label.add_theme_font_size_override("font_size", 12)
 	sled_label.add_theme_color_override("font_color", Color.WHITE)
 	sled_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	sled_label.add_theme_constant_override("outline_size", 4)
@@ -108,7 +108,10 @@ func _update_label() -> void:
 		return
 	label.text = "Score: %d" % score
 	if sled != null and sled.is_waiting():
-		sled_label.text = "Sled leaves in: %d" % ceili(sled.get_time_left())
+		var secs := ceili(sled.get_time_left())
+		sled_label.text = "SLEIGH LEAVES IN %ds" % secs
+		var urgent := secs <= 10 and int(elapsed * 3) % 2 == 0
+		sled_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3) if urgent else Color.WHITE)
 	else:
 		sled_label.text = ""
 
