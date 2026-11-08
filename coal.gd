@@ -31,7 +31,7 @@ func _apply_gravity_field(delta: float) -> void:
 		side = 1.0
 	var tangent := outward.orthogonal() * -side
 	var desired := (tangent + outward * falloff).normalized()
-	var max_turn := player.field_strength * (0.3 + falloff) * delta
+	var max_turn: float = player.field_strength * (0.3 + falloff) * delta
 	direction = direction.rotated(clampf(direction.angle_to(desired), -max_turn, max_turn))
 	# Keep the coal outside the inner part of the field
 	var safe := radius * 0.4
