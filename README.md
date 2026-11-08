@@ -25,12 +25,12 @@ Santa slides on ice in a square arena, dodging coal thrown by angry children whi
 ## Export for the web
 
 1. Open **Project > Export** and select the **Web** preset (already configured).
-2. Set the export path to `export/index.html`, outside the project folder.
+2. Set the export path to a folder outside the project, such as `../export/index.html`.
 3. Click **Export Project**.
 4. Serve the output over HTTP. Opening `index.html` directly from disk will not work:
 
    ```sh
-   cd export
+   cd ../export
    python3 -m http.server 8000
    ```
 
