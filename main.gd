@@ -183,11 +183,15 @@ func _update_kid_arrivals(delta: float) -> void:
 func _update_snack(delta: float) -> void:
 	if snack_time_left > 0.0:
 		snack_time_left -= delta
-		# At full health the snack stays put until it's needed
-		if player.lives < player.max_lives and player.global_position.distance_to(snack_pos) < snack_range:
+		# At full health the snack makes Santa grow; once fully grown it stays put
+		if (player.lives < player.max_lives or player.can_grow()) \
+				and player.global_position.distance_to(snack_pos) < snack_range:
 			snack_time_left = 0.0
 			Sfx.play("santa_eat_snack")
-			player.heal()
+			if player.lives < player.max_lives:
+				player.heal()
+			else:
+				player.grow()
 		if snack_time_left <= 0.0:
 			snack_cooldown = snack_interval
 			queue_redraw()

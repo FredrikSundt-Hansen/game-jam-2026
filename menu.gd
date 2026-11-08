@@ -16,8 +16,11 @@ Santa slides on ice!
 5. Gifts left behind make
    more kids angry!
 
-Dodge the coal. Eat cookies
-to get hearts back.
+Dodge the coal. Candy canes
+give hearts back. At full
+health they make Santa
+bigger and add a force field
+that bends the coal.
 
 F11: Fullscreen
 
@@ -42,7 +45,7 @@ func _ready() -> void:
 	for i in options.size():
 		option_labels.append(_make_label("", 24, Vector2(0, 220 + i * 44), Color.WHITE))
 	hint = _make_label("Up/Down + Enter", 12, Vector2(0, 380), Color(0.7, 0.9, 1))
-	guide = _make_label(GUIDE_TEXT, 16, Vector2(0, 30), Color.WHITE)
+	guide = _make_label(GUIDE_TEXT, 13, Vector2(0, 10), Color.WHITE)
 	guide.visible = false
 	_refresh()
 

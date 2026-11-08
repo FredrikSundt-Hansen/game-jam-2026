@@ -8,8 +8,14 @@ signal died
 @export var friction: float = 10.0
 @export var max_lives: int = 3
 @export var invulnerable_time: float = 1.0
+@export var max_size_level: int = 4
+@export var size_per_level: float = 0.15
+@export var field_radius_base: float = 24.0
+@export var field_radius_per_level: float = 10.0
+@export var field_strength: float = 4.0 # how sharply coal curves at the centre; negative pulls coal in
 
 var lives: int
+var size_level: int = 0
 var invulnerable: bool = false
 var dead: bool = false
 var gift_name: String = ""
@@ -25,7 +31,29 @@ func _ready() -> void:
 	lives = max_lives
 	add_to_group("player")
 
+func can_grow() -> bool:
+	return size_level < max_size_level
+
+func grow() -> void:
+	if dead or not can_grow():
+		return
+	size_level += 1
+	var s := 1.0 + size_level * size_per_level
+	create_tween().tween_property(self, "scale", Vector2(s, s), 0.25) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	queue_redraw()
+
+## World-space radius of the gravity field; zero until Santa has grown.
+func get_field_radius() -> float:
+	if size_level == 0:
+		return 0.0
+	return field_radius_base + size_level * field_radius_per_level
+
 func _draw() -> void:
+	if size_level > 0:
+		var r := get_field_radius() / scale.x
+		draw_arc(Vector2.ZERO, r, 0.0, TAU, 48, Color(1, 1, 1, 0.5), 1.0)
+		draw_circle(Vector2.ZERO, r, Color(1, 1, 1, 0.08))
 	if has_gift:
 		draw_rect(Rect2(-4, -18, 8, 8), Color(0.2, 0.75, 0.3))
 		draw_rect(Rect2(-1, -18, 2, 8), Color(1, 0.85, 0.2))
